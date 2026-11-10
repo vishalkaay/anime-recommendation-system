@@ -2,12 +2,14 @@
 
 A content-based recommender for anime. Pick a title and it suggests the most similar ones from a catalogue of about 12,000, using each title's name, genres and type.
 
+**Try it: [suggesteria-anime.streamlit.app](https://suggesteria-anime.streamlit.app/)**
+
 ```console
 $ python -c "from recommender import Recommender; print(Recommender.from_csv().recommend('Fullmetal Alchemist: Brotherhood', 3))"
 ['Fullmetal Alchemist: Brotherhood Specials', 'Fullmetal Alchemist', 'Fullmetal Alchemist: Brotherhood - 4-Koma Theater']
 ```
 
-## Run it
+## Run it locally
 
 ```bash
 pip install -r requirements.txt
