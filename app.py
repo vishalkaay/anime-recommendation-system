@@ -1,38 +1,34 @@
 import streamlit as st
-import pandas as pd
-import pickle
 
-# Load data and models
-anime = pd.read_csv("anime.csv")
-vectorizer = pickle.load(open("PickleFiles/vectorizer.pkl", "rb"))
-anime_similarity = pickle.load(open("PickleFiles/anime_similarity.pkl", "rb"))
+from recommender import Recommender
 
-# Streamlit UI
+
+@st.cache_resource
+def get_recommender() -> Recommender:
+    return Recommender.from_csv()
+
+
+recommender = get_recommender()
+
 st.title("Anime Recommendation System")
 
-# Dropdown for anime selection
-anime_names = anime['name'].tolist()
-selected_anime = st.selectbox("Choose an anime", anime_names)
+selected = st.selectbox("Choose an anime", recommender.names)
+count = st.slider("How many recommendations", min_value=1, max_value=20, value=5)
 
-# Recommendation function
-def recommend_anime(anime_name, k=5):
-    anime_name = anime_name.lower()
-    matched_indices = anime[anime['name'].str.lower() == anime_name].index
-
-    if len(matched_indices) == 0:
-        return []
-
-    anime_index = matched_indices[0]
-    sim_scores = list(enumerate(anime_similarity[anime_index]))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:k+1]
-    return [anime['name'][i[0]] for i in sim_scores]
-
-# Display recommendations
 if st.button("Get Recommendations"):
-    recommendations = recommend_anime(selected_anime)
-    if recommendations:
-        st.write("### Recommended Anime:")
-        for rec in recommendations:
-            st.write(f"- {rec}")
-    else:
+    results = recommender.similar(selected, count)
+    if results.empty:
         st.write("No recommendations found.")
+    else:
+        st.subheader("Recommended anime")
+        st.dataframe(
+            results[["name", "genre", "type", "rating", "similarity"]],
+            hide_index=True,
+            column_config={
+                "name": "Name",
+                "genre": "Genres",
+                "type": "Type",
+                "rating": st.column_config.NumberColumn("Rating", format="%.2f"),
+                "similarity": st.column_config.NumberColumn("Similarity", format="%.2f"),
+            },
+        )
