@@ -31,7 +31,7 @@ The comparison is done on demand. Building the vectors takes about a tenth of a 
 | `recommender.py` | Loads the data and finds similar titles. |
 | `app.py` | The Streamlit interface. |
 | `evaluate.py` | Scores the recommender over the whole catalogue. |
-| `tests/` | Unit tests. Run them with `pytest`. |
+| `tests/` | Unit tests. Run them with `pip install pytest` and then `pytest`. |
 | `anime.csv` | The dataset: name, genres, type, episodes, rating and member count. |
 
 ## Evaluation
