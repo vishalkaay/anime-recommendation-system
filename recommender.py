@@ -31,7 +31,8 @@ class Recommender:
     """Finds the titles most similar to a given one."""
 
     def __init__(self, anime: pd.DataFrame) -> None:
-        self.anime = anime
+        # Similarity vectors and evaluation both use positional row indices.
+        self.anime = anime = anime.reset_index(drop=True)
         features = anime["name"] + " " + anime["genre"] + " " + anime["type"]
         # TF-IDF rows are L2-normalised, so a dot product between two rows is
         # their cosine similarity. That lets one title be compared with all the
@@ -56,12 +57,12 @@ class Recommender:
         ``name`` is not in the dataset.
         """
         position = self._index.get(name.casefold())
+        k = min(k, len(self.anime) - 1)
         if position is None or k <= 0:
             return self.anime.iloc[0:0].assign(similarity=[])
 
         scores = linear_kernel(self.vectors[position], self.vectors).ravel()
         scores[position] = -1.0  # never recommend the title itself
-        k = min(k, len(scores) - 1)
         top = np.argpartition(scores, -k)[-k:]
         top = top[np.argsort(scores[top])[::-1]]
         return self.anime.iloc[top].assign(similarity=scores[top])

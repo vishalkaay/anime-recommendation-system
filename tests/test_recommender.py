@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from recommender import Recommender, load_anime
+from evaluate import evaluate
 
 
 @pytest.fixture
@@ -45,3 +46,19 @@ def test_dataset_loads_with_clean_titles() -> None:
     anime = load_anime()
     assert not anime["name"].str.contains("&#039;").any()
     assert not anime[["genre", "type"]].isna().any().any()
+
+
+def test_single_title_has_no_recommendations(recommender: Recommender) -> None:
+    single = Recommender(recommender.anime.iloc[:1])
+    assert single.recommend("Space Pirates") == []
+    assert single.similar("Space Pirates").empty
+    assert evaluate(single) == (0.0, 0.0)
+
+
+def test_filtered_catalogue_can_be_evaluated(recommender: Recommender) -> None:
+    catalogue = recommender.anime.iloc[:2].copy()
+    catalogue.index = [10, 20]
+    filtered = Recommender(catalogue)
+    assert filtered.recommend("Space Pirates", 1) == ["Space Pirates 2"]
+    assert evaluate(filtered, 1) == (1.0, 1.0)
+    assert catalogue.index.tolist() == [10, 20]
